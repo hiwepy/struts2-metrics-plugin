@@ -1,0 +1,488 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.vindell</groupId>
+	<artifactId>struts2-metrics-plugin</artifactId>
+	<!-- 版本随着 struts2-core 版本变更 -->
+	<version>2.5.10.1</version>
+	
+	<description>基于struts2的扩展实现</description>
+	
+	<licenses>
+        <license>
+            <name>The Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+	<!-- 组织信息  -->
+  	<organization>
+    	<name>Jeefw</name>
+    	<url>www.jeefw.com</url>
+  	</organization>
+  
+  	<!-- 开发者信息  -->
+    <developers>
+        <developer>
+        	<id>001</id>
+            <name>wandalong</name>
+            <email>hnxyhcwdl1003@163.com</email>
+            <url>https://github.com/vindell</url>
+        </developer>
+    </developers> 
+	
+    <build>
+		<pluginManagement>
+			<plugins>
+				<!-- 编译插件：编译主代码至主输出目录 -->  
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.5.1</version> 
+					<!-- 设置源文件编码方式 -->  
+					<configuration>
+						<defaultLibBundleDir>lib</defaultLibBundleDir>
+						<!-- 源代码编译版本 -->
+						<source>1.7</source>
+						<!-- 目标平台编译版本 -->
+						<target>1.7</target>
+						<!-- 字符集编码 -->
+						<encoding>${project.build.sourceEncoding}</encoding>
+						<!--  -->
+						<maxmem>512M</maxmem>
+					</configuration>
+				</plugin>
+				<!-- 资源插件：复制主资源文件至主输出目录 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.7</version>
+					<!-- 解决资源文件的编码问题 -->  
+					<configuration>
+						<!-- 字符集编码 -->
+						<encoding>${project.build.sourceEncoding}</encoding>
+					</configuration>
+					<!-- 复制测试资源文件至测试输出目录复制resources到test-classess -->
+					<executions>
+						<execution>
+							<id>copy-resources</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>copy-resources</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>${basedir}/target/test-classes</outputDirectory>
+								<resources>
+									<resource>
+										<directory>src/main/resources</directory>
+										<!--<filtering>true</filtering>
+									--></resource>
+								</resources>
+							</configuration>
+						</execution>
+					</executions>
+					<dependencies>
+			            <dependency>
+			                <groupId>org.apache.maven.shared</groupId>
+			                <artifactId>maven-filtering</artifactId>
+			                <version>1.3</version>
+			            </dependency>
+			         </dependencies>
+				</plugin>
+				<!-- 单元测试插件 ：执行测试用例-->  
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<!-- 跳过单元测试 -->
+						<skip>true</skip>
+						<skipTests>true</skipTests>
+						<!--
+							forkMode 可设置值有 “never”， “once”， “always” 和 “pertest”。
+							pretest： 每一个测试创建一个新进程，为每个测试创建新的JVM是单独测试的最彻底方式，但也是最慢的，不适合hudson上持续回归。
+							once：在一个进程中进行所有测试。once为默认设置，在Hudson上持续回归时建议使用默认设置。
+							always：在一个进程中并行的运行脚本，Junit4.7以上版本才可以使用，surefire的版本要在2.6以上提供这个功能，其中 threadCount：执行时，指定可分配的线程数量。只和参数parallel配合使用有效。默认：5。
+						 -->
+						<forkMode>once</forkMode>
+						<argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m</argLine>  
+						<additionalClasspathElements>  
+			                <additionalClasspathElement>  
+			                    ${basedir}/target/test-classes  
+			                </additionalClasspathElement>  
+			            </additionalClasspathElements>  
+			            <includes>  
+			                <include>**/*Test.java</include> 
+			            </includes> 
+                        <excludes>
+                            <exclude>**/TestBean.java</exclude>
+                        </excludes>
+					</configuration>					
+				</plugin>
+				<!-- jar包生成插件 ：创建项目jar包--> 
+				<plugin>  					 
+					<groupId>org.apache.maven.plugins</groupId>  
+					<artifactId>maven-jar-plugin</artifactId>  
+					<version>2.6</version>  
+					<!-- 打包jar文件时，配置manifest文件，加入lib包的jar依赖 -->  
+					<configuration>  
+	                    <archive>  
+	                        <manifest>  
+	                            <addClasspath>true</addClasspath>  
+	                            <classpathPrefix>lib/</classpathPrefix>  
+	                            <mainClass>.....Main</mainClass>  
+	                        </manifest>  
+	                    </archive>  
+	                </configuration>  
+				</plugin> 
+				<!-- 安装插件：将项目输出构件安装到本地仓库 --> 
+				<plugin>  					 
+					<groupId>org.apache.maven.plugins</groupId>  
+					<artifactId>maven-install-plugin</artifactId>  
+					<version>2.5.2</version>  
+				</plugin> 
+				<!-- 发布插件 ：将项目输出构件部署到远程仓库--> 
+				<plugin>  
+		            <groupId>org.apache.maven.plugins</groupId>  
+		            <artifactId>maven-deploy-plugin</artifactId>  
+		            <version>2.8.2</version>  
+		        </plugin>
+		        <!-- release插件: 自动进行工程版本升级 -->
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-release-plugin</artifactId>
+	                <version>2.5.3</version>
+	                <configuration>
+	                    <!-- 设置分支跟里程碑的url -->
+	                    <branchBase>svn://121.43.110.87/jeefw/jeefw-desktop/branches</branchBase>
+	                    <tagBase>svn://121.43.110.87/jeefw/jeefw-desktop/tags</tagBase>
+	                </configuration>
+	            </plugin>	
+		        <!-- 签名插件 ：自动完成GPG签名--> 
+		        <plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+					<executions>
+					    <execution>
+							<id>sign-artifacts</id>
+							<phase>verify</phase>
+							<goals>
+							     <goal>sign</goal>
+							</goals>
+					    </execution>
+					</executions>
+				</plugin>	
+				<!-- 源码插件:发布时自动将源码同时发布 -->				
+				<plugin>
+					 <groupId>org.apache.maven.plugins</groupId>
+					 <artifactId>maven-source-plugin</artifactId>
+					 <version>3.0.0</version> 
+					 <!-- 打包source文件为jar文件 -->
+					 <configuration>  
+					 	 <testFailureIgnore>true</testFailureIgnore>
+	                     <attach>true</attach>  
+	                     <encoding>UTF-8</encoding>  
+	                 </configuration> 
+					 <executions>
+						 <execution>
+							 <id>attach-sources</id>
+							 <phase>package</phase>
+							 <goals>
+								<goal>jar-no-fork</goal>
+							 </goals>
+						 </execution>
+					 </executions>
+				</plugin>
+				<!-- 文档插件:发布时自动生成文档 -->	
+				<plugin>  
+		            <groupId>org.apache.maven.plugins</groupId>  
+		            <artifactId>maven-javadoc-plugin</artifactId>  
+		            <version>2.10.3</version> 
+					<configuration>  
+	                    <aggregate>true</aggregate>  
+                       	<charset>UTF-8</charset> 
+                        <encoding>UTF-8</encoding> 
+                        <docencoding>UTF-8</docencoding> 
+	                </configuration>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<phase>package</phase>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>				
+		        </plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<!-- 资源插件：复制主资源文件至主输出目录 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+			</plugin>
+			<!-- 编译插件：编译主代码至主输出目录 -->  
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<!-- 单元测试插件 ：执行测试用例 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin> 
+			<!-- jar包生成插件 ：创建项目jar包 -->
+			<plugin>  					 
+				<groupId>org.apache.maven.plugins</groupId>  
+				<artifactId>maven-jar-plugin</artifactId>  
+			</plugin> 
+			<!-- 安装插件：将项目输出构件安装到本地仓库 --> 
+			<plugin>  					 
+				<groupId>org.apache.maven.plugins</groupId>  
+				<artifactId>maven-install-plugin</artifactId>  
+			</plugin> 
+			<!-- 发布插件 ：将项目输出构件部署到远程仓库--> 
+			<plugin>  
+	            <groupId>org.apache.maven.plugins</groupId>  
+	            <artifactId>maven-deploy-plugin</artifactId>  
+	        </plugin>	
+			<!-- 源码插件:发布时自动将源码同时发布 -->				
+			<plugin>
+				 <groupId>org.apache.maven.plugins</groupId>
+				 <artifactId>maven-source-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
+    <properties>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ 		<commons-beanutils.version>1.9.3</commons-beanutils.version>
+ 		<junit.version>4.12</junit.version>
+ 		<jsp-api.version>2.2</jsp-api.version>
+ 		<servlet-api.version>3.0.1</servlet-api.version>
+ 		<slf4j.version>1.7.21</slf4j.version>
+		<struts2.version>2.5.10.1</struts2.version>
+		<metrics.version>3.2.2</metrics.version>
+	</properties>
+	
+	<dependencyManagement>
+		<dependencies>
+			
+			<!-- ######################测试工具包###################### -->
+			
+			<!--junit : Junit测试是程序员测试，即白盒测试 -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+			
+			<!-- ######################Servlet相关基础包###################### -->
+			
+			<!-- servlet 基础依赖包 -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${servlet-api.version}</version>
+			</dependency>
+			<!-- jsp-api -->
+			<dependency>
+				<groupId>javax.servlet.jsp</groupId>
+				<artifactId>jsp-api</artifactId>
+				<version>${jsp-api.version}</version>
+			</dependency>
+			
+			<!-- ######################日志组件工具包###################### -->
+			
+			<!-- SLF4J，即简单日志门面（Simple Logging Facade for Java），不是具体的日志解决方案，它只服务于各种各样
+			 的日志系统。按照官方的说法，SLF4J是一个用于日志系统的简单Facade，允许最终用户在部署其应用时使用其所希望的日志系统。 -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			
+			<!-- ###################### Struts2.x 核心框架  ###################### -->
+			
+			<dependency>
+				<groupId>org.apache.struts</groupId>
+				<artifactId>struts2-core</artifactId>
+				<version>${struts2.version}</version>
+			</dependency>
+			
+			
+			<!-- ###################### Metrics 3.x ###################### -->
+			
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-annotation</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-core</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-healthchecks</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-jvm</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			
+			<!-- HTTP报表
+				 Metric也提供了一个servlet (AdminServlet)提供JSON风格的报表。
+				   它还提供了单一功能的servlet (MetricsServlet, HealthCheckServlet, ThreadDumpServlet, PingServlet)。
+ 			-->
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-servlets</artifactId>
+			   <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-httpclient</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-servlet</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-ehcache</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>io.dropwizard.metrics</groupId>
+			    <artifactId>metrics-log4j2</artifactId>
+			    <version>${metrics.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>com.ryantenney.metrics</groupId>
+			    <artifactId>metrics-spring</artifactId>
+			    <version>3.1.3</version>
+			</dependency>
+			
+		</dependencies>
+	</dependencyManagement>	
+	
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>com.oreilly</groupId>
+		    <artifactId>cos</artifactId>
+		    <version>20021105</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+		<!-- 常用功能包括类型转换和动态bean的创建 -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>${commons-beanutils.version}</version>
+		</dependency>
+	
+		<!-- ###################### Struts2.x 核心框架  ###################### -->
+		
+		<dependency>
+            <groupId>org.apache.struts</groupId>
+            <artifactId>struts2-core</artifactId>
+            <exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>asm</artifactId>
+					<groupId>asm</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>asm-commons</artifactId>
+					<groupId>asm</groupId>
+				</exclusion>
+            </exclusions>
+        </dependency>
+        
+        <!-- ###################### Metrics 3.x ###################### -->
+			
+		<dependency>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-annotation</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-core</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-healthchecks</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>com.ryantenney.metrics</groupId>
+		    <artifactId>metrics-spring</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-aop</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context-support</artifactId>
+				</exclusion>
+		    </exclusions>
+		</dependency>
+		
+		<!-- 前端方面访问的接口 -->
+		<dependency>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-servlets</artifactId>
+		    <optional>true</optional>
+		</dependency>
+		<!-- 默认的第三方组件监控实现 -->
+		<dependency>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-servlet</artifactId>
+		</dependency>
+		<!-- <dependency>
+		    <groupId>io.dropwizard.metrics</groupId>
+		    <artifactId>metrics-jvm</artifactId>
+		</dependency>-->
+		
+	</dependencies>
+
+</project>
