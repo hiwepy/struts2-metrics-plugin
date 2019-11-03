@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.webjars.matcher.AntPathMatcher;
-import org.apache.struts2.webjars.matcher.PathMatcher;
+import org.apache.struts2.metrics.utils.AntPathMatcher;
+import org.apache.struts2.metrics.utils.PathMatcher;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
